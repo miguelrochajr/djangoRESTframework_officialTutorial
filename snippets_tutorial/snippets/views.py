@@ -1,6 +1,6 @@
-from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from rest_framework import generics
 
 from .models import Snippet
 from .serializers import SnippetSerializer
@@ -8,6 +8,23 @@ from .serializers import SnippetSerializer
 
 # List of HTTP status codes:
 # https://en.wikipedia.org/wiki/List_of_HTTP_status_codes
+
+
+class SnippetList(generics.ListAPIView):
+    """
+    Lista all snippets, or cerate a new snippet.
+    """
+    queryset = Snippet.objects.all()
+    serializer_class = SnippetSerializer
+
+
+class SnippetDetail(generics.RetrieveUpdateDestroyAPIView):
+    """
+    Retrieve, update or delete a snippet instance.
+    """
+    queryset = Snippet.objects.all()
+    serializer_class = SnippetSerializer
+
 
 @api_view(['GET', 'POST'])
 def snippet_list(request, format=None):
