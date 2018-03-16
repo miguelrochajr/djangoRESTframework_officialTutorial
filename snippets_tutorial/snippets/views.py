@@ -1,6 +1,8 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from rest_framework import (generics, status, permissions)
+from rest_framework.reverse import reverse
+from rest_framework import (generics, status, permissions, renderers)
+from rest_framework.response import Response
 
 from django.contrib.auth.models import User
 
@@ -11,6 +13,15 @@ from .permissions import IsOwnerOrReadOnly
 
 # List of HTTP status codes:
 # https://en.wikipedia.org/wiki/List_of_HTTP_status_codes
+class SnippetHighlight(generics.GenericAPIView):
+    queryset = Snippet.objects.all()
+    renderer_classes = (renderers.StaticHTMLRenderer,)
+
+    def get(self, request, *args, **kwargs):
+        snippet = self.get_object()
+        return Response(snippet.highlighted)
+
+
 class UserList(generics.ListAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
@@ -43,6 +54,14 @@ class SnippetDetail(generics.RetrieveUpdateDestroyAPIView):
         permissions.IsAuthenticatedOrReadOnly,
         IsOwnerOrReadOnly,
     )
+
+
+@api_view(['GET'])
+def api_root(request, format=None):
+    return Response({
+        'users': reverse('users-list', request=request, format=format),
+        'snippets': reverse('snippet-list', request=request, format=format),
+    })
 
 
 @api_view(['GET', 'POST'])
